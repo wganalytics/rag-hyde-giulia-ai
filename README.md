@@ -115,16 +115,12 @@ PRJ-08_HyDE_RAG/
 Pré-requisitos: Python 3.12, Ollama rodando localmente com um modelo de chat instalado (ex.: `llama3.2:3b`) e o modelo de embedding (`nomic-embed-text:latest`).
 
 ```bash
-# a partir da raiz do monorepo, com o venv do projeto ativo
-pip install -r dev/rag/PRJ-09_Deploy_Cloud/docker/requirements.txt
-
 cd dev/rag/PRJ-08_HyDE_RAG
+pip install -r requirements.txt
 cp .env.template .env   # preencher LLM_PROVIDER e, se aplicável, a chave do provider escolhido
 
 streamlit run frontend/app.py
 ```
-
-As dependências reais do projeto (LangChain, ChromaDB, Streamlit, SDKs de cada provider, etc.) estão consolidadas em `dev/rag/PRJ-09_Deploy_Cloud/docker/requirements.txt`, compartilhado por todos os projetos PRJ-01 a PRJ-08 do monorepo — o `requirements.txt` local deste projeto é apenas um placeholder.
 
 Rodando localmente (fora de container), este projeto importa `shared.infra.lib.observatory`, que vive na raiz do monorepo. O `conftest.py` resolve isso para os testes; para rodar a interface fora de container, garanta que a raiz do monorepo esteja no `PYTHONPATH` (o próprio `frontend/app.py` já adiciona os diretórios necessários ao `sys.path` no topo do arquivo).
 
@@ -157,5 +153,4 @@ Suite atual: **48 testes passando**, cobrindo o pipeline HyDE de ponta a ponta (
 - **Sem etapa de geração de resposta final.** O pipeline termina na recuperação dos documentos reais; não há um passo de "responda a pergunta usando este contexto". O escopo do projeto é a tradução de intenção e a qualidade da recuperação, não um chatbot completo.
 - **Embedding sempre local via Ollama**, independentemente do provider escolhido para gerar o documento hipotético. Trocar o modelo de embedding invalidaria o banco vetorial já indexado, então essa peça foi deliberadamente deixada fora do sistema multi-provider.
 - **Sem API própria.** Ao contrário de projetos anteriores da série (ex.: PRJ-01, PRJ-02), este projeto só expõe uma interface Streamlit que acessa o ChromaDB diretamente — não há uma camada FastAPI separada.
-- **`requirements.txt` local é um placeholder.** As dependências reais são consolidadas em um único arquivo compartilhado pelo PRJ-09 para todos os projetos PRJ-01 a PRJ-08, evitando manter e reconstruir oito imagens quase idênticas.
 - **Persistência do vector store é local em disco** (`data/vector_db/`), ignorada pelo Git — cada ambiente (local ou container) constrói sua própria base a partir da ingestão feita pela interface.
