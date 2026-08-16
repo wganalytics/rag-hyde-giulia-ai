@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 from langchain_chroma import Chroma
 from langchain_ollama import OllamaEmbeddings
 from langchain_core.documents import Document
-from INFRA.lib.observatory import MetricsTracker, track_step
+from shared.infra.lib.observatory import MetricsTracker, track_step
 
 load_dotenv()
 

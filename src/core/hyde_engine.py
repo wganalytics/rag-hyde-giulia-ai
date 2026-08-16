@@ -1,10 +1,11 @@
 import os
 from typing import Optional
 from dotenv import load_dotenv
-from langchain_ollama import ChatOllama
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
-from INFRA.lib.observatory import MetricsTracker, track_step
+from shared.infra.lib.observatory import MetricsTracker, track_step
+
+from .llm_factory import get_llm, resolve_model, resolve_provider
 
 load_dotenv()
 
@@ -13,16 +14,13 @@ class HyDEEngine:
     Motor responsável por gerar documentos hipotéticos (ideal answers) 
     para expandir a semântica da busca.
     """
-    def __init__(self, model_name: str = None, tracker: Optional[MetricsTracker] = None):
+    def __init__(self, model_name: str = None, tracker: Optional[MetricsTracker] = None,
+                 provider: str = None):
         self.tracker = tracker
-        self.model_name = model_name or os.getenv("HYDE_MODEL_NAME", "llama3.2:3b")
-        base_url = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
-        
-        self.llm = ChatOllama(
-            model=self.model_name,
-            base_url=base_url,
-            temperature=0.0
-        )
+        # provider/modelo vêm da fábrica: sem argumento, usa LLM_PROVIDER do .env.
+        self.provider = resolve_provider(provider)
+        self.model_name = resolve_model(self.provider, model_name)
+        self.llm = get_llm(self.provider, self.model_name, temperature=0.0)
         
         # Prompt para geração do documento hipotético
         self.hyde_prompt = ChatPromptTemplate.from_template(

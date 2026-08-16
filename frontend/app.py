@@ -11,13 +11,16 @@ sys.path.append(str(Path(__file__).parent.parent))
 
 from src.core.hyde_engine import HyDEEngine
 from src.core.hyde_retriever import HyDERetriever
-from INFRA.lib.observatory import MetricsTracker
+from shared.infra.lib.observatory import MetricsTracker
 
 st.set_page_config(page_title="GARE | PRJ-08 HyDE RAG", layout="wide")
 
 # Inicializar Tracker e Motores
 tracker = MetricsTracker()
-hyde_engine = HyDEEngine(tracker=tracker)
+from seletor_llm import selecionar_motor  # mesma pasta do app (Streamlit poe no path)
+_provider, _modelo = selecionar_motor()
+
+hyde_engine = HyDEEngine(model_name=_modelo, tracker=tracker, provider=_provider)
 retriever = HyDERetriever(tracker=tracker)
 
 st.title("🛡️ GIULIA AI | HyDE RAG: Tradutor de Intenção")
@@ -28,7 +31,9 @@ O sistema gera uma resposta 'ideal' fictícia para sua pergunta e a usa para bus
 
 with st.sidebar:
     st.header("⚙️ Configurações")
-    model_name = st.selectbox("Modelo HyDE", ["llama3.2:3b", "llama3.1:8b"], index=0)
+    # O modelo agora vem do seletor de motor no topo da barra lateral,
+    # que lista os modelos realmente instalados no Ollama. A lista fixa
+    # que existia aqui oferecia llama3.1:8b, que nem estava instalado.
     k_results = st.slider("Resultados (K)", 1, 5, 3)
     
     st.divider()
